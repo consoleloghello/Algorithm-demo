@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>享元模式</title>
+</head>
+
+<body>
+    
+    <script>
+        /*var Upload = function (uploadType) {
+            this.uploadType = uploadType;
+        }
+        Upload.prototype.delFile = function (id) {
+            uploadManger.setExternalState(id, this);
+            if (this.fileSize < 3000) {
+                return this.dom.parentNode.removeChild(this.dom);
+            }
+            if (window.confirm("确定删除文件吗？" + this.fileName)) {
+                return this.dom.parentNode.removeChild(this.dom);
+            }
+        }*/
+        /*工厂函数*/
+        /*var UploadFactory = (function () {
+            var createFlyWeightObjs = {};
+            return {
+                create: function (uploadType) {
+                    if (createFlyWeightObjs[uploadType]) {
+                        return createFlyWeightObjs[uploadType];
+                    }
+
+                    return createFlyWeightObjs[uploadType] = new Upload(uploadType);
+                }
+            }
+        })();*/
+
+        /*var uploadManger = function () {
+            var uploadDatabase = {};
+            return {
+                add: function (id, uploadType, fileName, fileSize) {
+                    var flyWeightObj = UploadFactory.create(uploadType);
+
+                    var dom = document.createElement("div");
+                    dom.innerHTML = "<span>文件名称：" + fileName + ",文件大小：" + fileSize + "</span><button class='delFile'>删除</button>";
+                    dom.querySelector(".delFile").onclick = function () {
+                        flyWeightObj.delFile(id);
+                    }
+                    document.body.appendChild(dom);
+                    uploadDatabase[id] = {
+                        fileName: fileName,
+                        fileSize: fileSize,
+                        dom: dom
+                    }
+                    return flyWeightObj;
+                },
+                setExternalState: function (id, flyWeightObj) {
+                    var uploadData = uploadDatabase[id];
+                    for (var i in uploadData) {
+                        flyWeightObj[i] = uploadData[i];
+                        // if (id = uploadData.id) {
+                        //     delete uploadDatabase[id];
+                        // }
+                    }
+                    console.log(uploadDatabase);
+                }
+            }
+        }();*/
+
+       /* window.startUpload = function (uploadType, files) {
+            for (var i = 0, file; file = files[i++];) {
+                var uploadObj = uploadManger.add(i, uploadType, file.fileName, file.fileSize);
+            }
+        }*/
+
+        // startUpload("plugin", [
+        //     {
+        //         fileName: "1.txt",
+        //         fileSize: "1000"
+        //     },
+        //     {
+        //         fileName: "3.txt",
+        //         fileSize: "500"
+        //     },
+        //     {
+        //         fileName: "5.jpg",
+        //         fileSize: "1000"
+        //     },
+        //     {
+        //         fileName: "7.txt",
+        //         fileSize: "1000"
+        //     }
+        // ]);
+    </script>
+
+    <script>
+        /*单例模式的工厂函数*/
+        var UploadFactory = (function(){
+            var uploadObj;
+            return {
+                create:function(){
+                    if(uploadObj){
+                        return uploadObj;
+                    }
+                    return uploadObj = new Upload();
+                }
+            }
+        })();
+    </script>
+
+    <script>
+        /*对象池*/
+        /*var toolTipFactory = (function () {
+            var toolTipPool = [];     //toolTip对象池
+            return {
+                create: function () {
+                    if (toolTipPool.length === 0) {
+                        var div = document.createElement("div");
+                        document.body.appendChild(div);
+                        return div;
+                    } else {
+                        return toolTipPool.shift();
+                    }
+                },
+                recover: function (tooltipDom) {
+                    return toolTipPool.push(tooltipDom);
+                }
+            }
+        })();*/
+
+        //产生对象
+        /*var ary = [];
+        for (var i = 0, str; str = ['A', 'B'][i++];) {
+            var toolTip = toolTipFactory.create();
+            toolTip.innerHTML = str;
+            ary.push(toolTip);
+        }*/
+        //回收对象
+        /*for (var i = 0, toolTip; toolTip = ary[i++];) {
+            toolTipFactory.recover(toolTip);
+        }*/
+
+        //再次创建对象
+        /*for (var i = 0, str; str = ['A', 'B', 'C', 'D', 'E', 'F'][i++];) {
+            var toolTip = toolTipFactory.create();
+            toolTip.innerHTML = str;
+        }*/
+    </script>
+
+    <script>
+        //通用对象池的实现
+        var objectPoolFactory = function (createObjFn) {
+            var objectPool = [];
+            return {
+                create: function () {
+                    console.log(objectPool);
+                    var obj = objectPool.length === 0 ? createObjFn.apply(this, arguments) : objectPool.shift();
+                    return obj;
+                },
+                recover: function (obj) {
+                    objectPool.push(obj);
+                }
+            }
+        };
+
+        var iframeFactory = objectPoolFactory(function () {
+            var iframe = document.createElement('iframe');
+            document.body.appendChild(iframe);
+            iframe.onload = function () {
+                iframe.onload = null;
+                iframeFactory.recover(iframe);
+            }
+            return iframe;
+        });
+
+        var iframe1 = iframeFactory.create();
+        iframe1.src = "http://news.qq.com";
+        var iframe2 = iframeFactory.create();
+        iframe2.src = "http://qq.com";
+        setTimeout(function () {
+            var iframe3 = iframeFactory.create();
+            iframe3.src = "http://v.qq.com";
+        }, 3000);
+    </script>
+</body>
+
+</html>
